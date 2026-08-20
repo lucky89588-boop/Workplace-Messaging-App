@@ -33,14 +33,15 @@ Native Expo React Native workplace messaging app for private employee and manage
 
 ## Architecture decisions
 
-- Version 1 is intentionally frontend-first and uses local mock data; Supabase should replace the context's data operations rather than the screen contracts.
+- Version 1 started frontend-first with local mock data; the checked-in `supabase/` migration now defines the secure shared-data foundation. Supabase should replace the context's data operations rather than the screen contracts.
+- Supabase tables use a `ba_` prefix and are managed through `supabase/migrations/`, not Drizzle push. Run schema changes through the Supabase SQL Editor or a Supabase migration pipeline.
 - Account approval is represented as a first-class flow: sign-up leads to a pending screen, while admin actions operate on pending registrations.
 - Announcements are a distinct conversation kind and remain pinned above normal chats.
 - Native iOS 26 tabs use NativeTabs when available, with a BlurView-backed classic tab fallback for Android and older iOS.
 
 ## Product
 
-The app includes a welcome/sign-up/pending-approval flow, chats with a permanently pinned announcements channel, one-to-one and group conversation UI, a glass message composer with local send behavior, searchable staff directory, staff profiles, settings with light/dark mode, and an admin approval area.
+The app includes a staff sign-in and policy flow, chats with a permanently pinned announcements channel, one-to-one and group conversation UI, a local message composer, searchable staff directory, staff profiles, settings with light/dark mode, emergency contacts, and an admin approval area.
 
 ## User preferences
 
