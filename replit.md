@@ -1,4 +1,4 @@
-# Northstar Workplace Messaging
+# Bridging Abilities Workplace Messaging
 
 Native Expo React Native workplace messaging app for private employee and management communication.
 
@@ -45,7 +45,7 @@ The app includes a welcome/sign-up/pending-approval flow, chats with a permanent
 ## User preferences
 
 - Keep this as a native React Native + Expo app; do not convert it to a web app, PWA, or WebView.
-- Preserve the original Northstar identity and use local mock data until the user approves the Supabase phase.
+- Preserve the Bridging Abilities identity and use the approved eight-hue palette for sender names; do not use the restricted status colours or royal blue.
 
 ## Gotchas
 

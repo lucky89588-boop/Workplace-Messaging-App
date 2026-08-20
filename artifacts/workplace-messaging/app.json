@@ -4,21 +4,21 @@
     "slug": "workplace-messaging",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/workplace-icon.png",
+    "icon": "./assets/images/company-logo.png",
     "scheme": "workplace-messaging",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/workplace-icon.png",
+      "image": "./assets/images/company-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": false
     },
     "android": {},
     "web": {
-      "favicon": "./assets/images/workplace-icon.png"
+      "favicon": "./assets/images/company-logo.png"
     },
     "plugins": [
       [
