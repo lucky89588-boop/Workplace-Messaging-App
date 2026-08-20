@@ -1,0 +1,205 @@
+# Bridging Abilities Staff — Mobile App Specification
+
+Build a native mobile app for iOS and Android, for submission to the App Store and Google Play.
+
+This is a private internal messaging app for a registered NDIS disability support provider in New South Wales, Australia. It is used by support workers and management only. There is no public sign-up, no free trial, no consumer audience.
+
+Use **React Native with Expo** and **TypeScript**. Expo gives us EAS Build for both stores, native push notifications, secure credential storage and over-the-air updates. Do not use a WebView wrapper — this must be a real native app.
+
+---
+
+## CRITICAL — THE BACKEND ALREADY EXISTS
+
+A production Supabase (PostgreSQL) backend is already built, with the full schema, row level security, audit triggers and storage buckets in place. **Do not create, drop or alter any table, policy, function or trigger.** Build the app against the existing schema exactly as described below.
+
+I will provide the Supabase project URL and publishable key. Use `@supabase/supabase-js` with the React Native async storage adapter. Store the session in `expo-secure-store`, not plain async storage.
+
+Row level security enforces all access rules server-side. Never write a client-side query that attempts to widen access.
+
+### Tables
+
+**profiles** — one row per worker, id matches the auth user id
+`id, full_name, position_title, phone, work_email, avatar_url, org_role ('owner'|'org_admin'|'staff'), employment_status ('active'|'suspended'|'ended'), policy_accepted_at, must_change_password, phone_visible, notifications_enabled, quiet_hours_start, quiet_hours_end, created_at, created_by, deactivated_at`
+
+IMPORTANT: `phone`, `work_email`, `failed_password_attempts` and `locked_until` are **not selectable by the client** — column-level grants block them. Do not attempt to select them. To get a colleague's phone number for the call button, call the function `public.staff_phone(_profile_id uuid)` via `supabase.rpc()`. It returns null when unavailable — handle that.
+
+**conversations**
+`id, type ('group'|'direct'), name, house_reference, description, avatar_url, accent_colour, created_by, created_at, archived_at, legal_hold, retention_until, is_announcement, posting_restricted, auto_enrol, pinned, allow_replies`
+
+A direct message is a conversation of type `direct` with exactly two members and a null name. An announcement channel is a conversation with `is_announcement` true and `posting_restricted` true.
+
+**conversation_members**
+`id, conversation_id, user_id, role ('admin'|'member'), joined_at, left_at, added_by, muted_until, last_read_at`
+
+`left_at` null means still a member. **Never delete a member row — set left_at.** Ordinary members may only update three columns on their own row: `last_read_at`, `muted_until`, `left_at`. Attempting to update any other column will be rejected.
+
+**messages**
+`id, conversation_id, sender_id, body, kind ('text'|'poll'|'event'), reply_to_id, requires_ack, sent_at, edited_at, deleted_at, deleted_by`
+
+**Messages can never be hard-deleted — a database trigger blocks it.** Deleting sets `deleted_at` and `deleted_by`. Render deleted messages as "This message was deleted".
+
+**attachments** — `id, message_id, storage_path, original_filename, mime_type, size_bytes, width, height, scan_status, uploaded_at`
+
+**acknowledgements** — `id, message_id, user_id, acknowledged_at` (unique per message per user)
+
+**message_mentions** — `id, message_id, mentioned_user_id, mention_type ('user'|'everyone'), display_text, created_at`
+
+**polls** — `id, message_id, question, allows_multiple, anonymous, closes_at, closed_at`
+**poll_options** — `id, poll_id, label, position`
+**poll_votes** — `id, poll_id, option_id, user_id, voted_at`
+
+**events** — `id, message_id, title, description, location, starts_at, ends_at, all_day, cancelled_at`
+**event_rsvps** — `id, event_id, user_id, response ('going'|'maybe'|'declined'), note, responded_at`
+
+**emergency_contacts** — `id, label, name, phone, notes, position, is_critical, active`
+
+**push_subscriptions** — `id, user_id, endpoint, p256dh, auth_key, device_label, platform, failure_count, created_at, last_seen_at`
+
+**audit_log** — insert-only, readable by org admins. The client cannot insert; only the server may.
+
+**exports** — `id, requested_by, conversation_id, date_from, date_to, reason, file_path, created_at`
+
+### Storage buckets (both private — use signed URLs)
+- `attachments` — 25MB limit, restricted MIME types, path `{conversation_id}/{message_id}/{filename}`
+- `avatars` — 5MB limit, images only, path `{user_id}/avatar.{ext}`
+
+### Helper functions
+These live in the **private** schema, not public: `private.is_member(uuid)`, `private.is_conv_admin(uuid)`, `private.is_org_admin()`, `private.is_active_user()`. They are used by RLS policies — you do not call them directly.
+
+Public functions you may call: `public.staff_phone(uuid)`, `public.conversation_summaries()`, `public.search_messages(...)`.
+
+---
+
+## SCREENS
+
+### Authentication
+1. **Login** — email and password. No sign-up link. No social login. Below the password field, helper text: "Forgotten your password? Contact your manager to have it reset." Lock the account for 15 minutes after 5 failed attempts.
+2. **Set your password** — shown when `profiles.must_change_password` is true. Cannot be skipped or dismissed; hide all navigation. Minimum 10 characters.
+3. **Policy acceptance** — shown once when `profiles.policy_accepted_at` is null. Displays the staff communication and device use policy with an "I agree" button that records the timestamp. Cannot be skipped.
+
+### Main navigation — bottom tabs
+**Chats · Announcements · Directory · Settings**
+
+### Chats
+4. **Chats list** — conversations the user currently belongs to, most recent activity first. Each row: 60px avatar (or coloured initials), name, last message preview, relative time, unread badge, a 3px left border in the conversation's `accent_colour`, a muted icon where muted, and an orange "@" where an unread message mentions them. Search field at the top searching both conversation names and message bodies. Floating action button to start a new chat. Use `conversation_summaries()` — do not fetch raw messages to build this list.
+
+5. **Chat view** — message bubbles, own messages right-aligned in Royal Blue with white text, others left-aligned in light grey with charcoal text. Group consecutive messages from the same sender within 5 minutes: one avatar, one name, stacked bubbles, timestamp on the last only. Date separators as centred pills. Sender names in group chats coloured deterministically from the sender's user id, matching their avatar colour.
+
+Load the most recent 50 messages, paginate older on scroll up, preserving scroll position. Subscribe to Supabase realtime for live updates — no polling.
+
+Composer with a text field, send button, and an attach menu offering Camera, Photo library, Document, Poll and Event. Long-press a message for Reply, Copy and Delete (own messages, or any message if the user is a conversation admin).
+
+Read state on the sender's own most recent message: grey ticks for sent, green ticks for read. In groups, "4 of 6" beside the ticks, tappable for a read / not-yet-read list.
+
+Search within the conversation via a magnifier in the header, stepping through matches.
+
+Update `last_read_at` when the conversation is opened.
+
+6. **New chat** — message a person, or create a group (name, house reference, accent colour, description, members). Creator becomes group admin. If a direct conversation with that person exists, open it rather than creating a duplicate.
+
+7. **Group info** — description, house reference, member list with admin badges, member count, mute options (8 hours, 1 week, until turned back on). Conversation admins can rename, add and remove members (setting `left_at`), and promote or demote between admin and member. Non-admins see a read-only view with Leave group. Each member row has a call button.
+
+### Announcements
+8. **Announcements list** — announcement channels the user belongs to, pinned first.
+9. **Announcement feed** — posts as cards, newest first, not chat bubbles. Author name and position, timestamp, body, attachments, and where `requires_ack` is true an "Acknowledge" button that becomes a tick with the time. Unacknowledged posts requiring acknowledgement sort to the top and are visually prominent using orange. Where `allow_replies` is false, show no reply option at all.
+10. **Compose announcement** — visible only to conversation admins and org admins. Body, attachments, a "Require staff to acknowledge" toggle, and a confirmation step stating how many people will receive it.
+11. **Read receipts** — for posts requiring acknowledgement, admins see who has and has not acknowledged, with names, positions and times, plus a copy-outstanding action.
+
+### Directory
+12. **Directory** — searchable list of active profiles with avatar, full name and position title. Tapping opens or starts a direct conversation. A call button on each row.
+13. **Person profile** — avatar, name, position, call button, message button.
+
+### Settings — grouped card layout
+Light neutral background with white rounded cards. Profile header at the top: 110px avatar (tappable to change), name at 30px, position title beneath.
+
+- **Card 1** — My profile · Mentions · Starred messages · Emergency contacts
+- **Card 2** — Account (change password, sign out of all devices) · Privacy (show my number to colleagues) · Notifications (master toggle, quiet hours, devices) · Appearance (light, dark, follow device) · Storage and data
+- **Card 3** (owner and org_admin only) — Admin console
+- **Card 4** — Staff communication policy · About this app · Log out (red, no chevron)
+
+14. **Emergency contacts** — critical contacts first in red, each with a large tappable call button. Must work offline — cache the list locally.
+15. **Mentions** — messages where the user was mentioned, newest first, tappable to jump to the message.
+
+### Admin console (owner and org_admin only)
+16. **Staff management** — list with search and status filter. Create staff (full name, position, phone in +61 format, email, org role) generating a temporary password shown once. Suspend, offboard (which also sets `left_at` on all their conversation memberships), reactivate, reset password, sign out of all devices. Never delete a profile.
+17. **Group management** — create, edit, archive groups; assign group admins; set accent colours.
+18. **Announcement channels** — create and edit, setting auto-enrol, replies allowed, pinned.
+19. **Emergency contacts management** — add, edit, reorder, deactivate.
+20. **Audit log** — reverse chronological, filterable by date, actor and action, exportable to CSV.
+
+All admin operations that need elevated privileges must run server-side. The Supabase service role key must never be bundled into the app.
+
+---
+
+## NATIVE CAPABILITIES
+
+**Push notifications** — use `expo-notifications` with FCM on Android and APNs on iOS. Register the device token in `push_subscriptions` on login. A server function sends on message insert, skipping the sender, anyone with `notifications_enabled` false, anyone whose `muted_until` is in the future, and anyone inside their quiet hours.
+
+**PRIVACY — NOT OPTIONAL.** The notification payload must never contain the message body, an attachment, or any participant information. Lock screens are visible to anyone nearby, including in participants' homes.
+- Title: the conversation name for groups, or the sender's name for direct messages.
+- Body: "Kirsten sent a message" / "sent a photo" / "sent a document" / "posted a poll" / "posted an event".
+- Mentions: "Kirsten mentioned you in Tuggerah house".
+- Announcements requiring acknowledgement: "New announcement — action needed".
+
+A mention must break through a mute. Quiet hours still apply to mentions.
+
+**Camera** — use `expo-camera` for in-app capture. Captured photos must upload directly to Supabase storage and **must not be saved to the device camera roll**. This is a compliance requirement: photographs may include participants.
+
+**Calling** — the call button opens the device dialler with a `tel:` link. Do not build in-app voice or video calling.
+
+**Offline** — cache recent conversations and the emergency contacts list locally so they open without signal. Queue outbound messages and send when connectivity returns, showing a pending state.
+
+**Security** — session in `expo-secure-store`; 12-hour idle timeout with automatic sign-out; optional TOTP two-factor for owner and org_admin only, never for ordinary staff; no screenshots of participant photos where the platform allows blocking it.
+
+---
+
+## DESIGN SYSTEM
+
+**Colours**
+Royal Blue #095CF2 · Purple #7A2BE0
+Accents: Cyan #19D3F3 · Green #33DC8D · Magenta #F210D8 · Orange #FB9A02 · Red #EA124A · Sky Blue #16A8FB
+Text: primary #1A1A2E, secondary #6B6B7B, muted #8B8B99
+Surfaces: white #FFFFFF, bubble grey #F2F2F6
+Border: #E8E8EE at 0.5px
+Signature gradient: #16A8FB → #7A2BE0 → #F210D8
+
+**Colour discipline — enforce strictly.** Royal Blue is used for exactly two things: the user's own message bubbles, and the single primary action on a screen. Nowhere else.
+
+Status colours have fixed meanings and are never decorative: green means done, orange means needs your attention, red means genuine emergency only.
+
+Sender name colours in groups come from a separate palette that excludes all of the above: Plum #8E1F6B · Purple #6B21C4 · Indigo #3B36B0 · Ocean #0A5C8A · Teal #0B6E6E · Slate #3F5566 · Aubergine #5B2A86 · Rust #8A4B2A. Derived deterministically from the user id and matching their avatar colour.
+
+**Typography** — system font stack. Message text 17px, line-height 1.45. Titles 17px weight 500. Sender name 13px. Timestamps 12px. Nothing below 16px for body text. Two weights only: 400 and 500. Use relative sizing so the app honours the device's own accessibility text size, and verify the layout holds at 130%.
+
+**Spacing** — strict 4px scale: 4, 8, 12, 16, 24, 32. No values in between.
+
+**Corners** — cards and inputs 12px; message bubbles 18px except the corner nearest the speaker at 4px; avatars and buttons fully round.
+
+**Other** — a 3px signature gradient strip below the top bar on every screen. Borders not shadows. Lucide outline icons, one weight. Minimum 48px touch targets, primary actions in the bottom third for one-handed use. Skeleton placeholders rather than spinners. Dark mode following the device setting, using a very dark neutral rather than pure black.
+
+**Restraint** — no gradient buttons, no frosted glass, no bounce animations, no drop shadows, no more than two font weights per screen. Respect reduce-motion.
+
+**Copy** — Australian English, sentence case, plain verbs. Buttons say exactly what they do: "Post announcement", not "Submit". No exclamation marks in system messages.
+
+**Context that should shape decisions:** support workers use this on phones, one-handed, often outdoors in bright sunlight, often mid-shift while assisting someone. Legibility and speed matter far more than decoration.
+
+---
+
+## STORE SUBMISSION
+
+Configure for EAS Build targeting both stores.
+
+- App name: Bridging Abilities Staff
+- Bundle identifier: au.com.bridgingabilities.staff
+- Icon and splash screen from the supplied logo
+- Portrait orientation only
+- Minimum iOS 15, Android 8
+
+**Permission strings — write these carefully, as Apple reviews them:**
+- Camera: "Used to take photographs during supported activities and share them with your team."
+- Photo library: "Used to attach photographs to messages."
+- Notifications: "Used to alert you to new messages from your team."
+
+**Apple review — be aware of this risk.** Apple sometimes rejects private business apps with no public sign-up under guideline 4.2 (minimum functionality) or 5.1.1. Prepare a demo account for the review team, and a note explaining that this is an internal tool for a registered NDIS provider, distributed only to employed staff. If it is rejected, the correct route is Apple Business Manager custom app distribution rather than public release.
+
+Do not include analytics, tracking, advertising SDKs, or any third-party script that transmits user data. This app handles information relating to people with disability and must not leak anything to third parties.
