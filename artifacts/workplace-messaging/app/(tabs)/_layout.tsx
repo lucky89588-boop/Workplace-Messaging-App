@@ -102,6 +102,12 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="staff"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
