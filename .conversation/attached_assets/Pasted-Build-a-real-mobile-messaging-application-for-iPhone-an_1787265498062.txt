@@ -1,0 +1,770 @@
+Build a real mobile messaging application for iPhone and Android using React Native, Expo and TypeScript.
+
+This app is for internal communication between management and employees of my business.
+
+The overall messaging experience should be inspired by WhatsApp in terms of simplicity, speed, familiarity and ease of use, but it must NOT copy WhatsApp branding, colours, logos, icons, assets or exact screen designs.
+
+The app must have its own original visual identity and should feel like a premium internal workplace communication app.
+
+## IMPORTANT
+
+I am a beginner and I have never built a mobile app before.
+
+Please build this in a way that is easy for me to manage using Replit Agent.
+
+Do not assume I understand programming terminology.
+
+Whenever you need something from me, explain clearly:
+
+1. What you need
+2. Why you need it
+3. Where I can find it
+4. Where I need to enter it
+
+Do not build a web app.
+
+Do not build a PWA.
+
+Do not use a WebView wrapper.
+
+This must be a proper React Native mobile application for:
+
+- iPhone
+- Android
+
+The app must be compatible with Expo EAS so it can later be published to:
+
+- Apple App Store
+- Google Play Store
+
+## PROJECT STRUCTURE
+
+Use:
+
+- React Native
+- Expo
+- TypeScript
+- Expo Router
+
+I will connect Supabase later.
+
+For now, structure the app so Supabase can be added cleanly without rebuilding the whole application.
+
+Create clear service layers/interfaces for:
+
+- Authentication
+- User profiles
+- Messages
+- Conversations
+- Groups
+- Announcements
+- Attachments
+- Notifications
+- Admin approval
+
+Use mock/local data initially where necessary.
+
+Do not hard-code the project in a way that makes connecting Supabase difficult later.
+
+## PRODUCT PURPOSE
+
+This is a private workplace messaging application for business employees.
+
+It should feel as easy and familiar to use as WhatsApp while being focused on professional staff communication.
+
+The main experience should include:
+
+- Staff messaging
+- Management messaging
+- Group chats
+- Company announcements
+- Staff directory
+- User profiles
+- Notifications
+- Search
+- Attachments
+- Account settings
+
+## DESIGN DIRECTION
+
+Create a premium modern interface inspired by the glass appearance of recent iOS design.
+
+The overall visual direction should feel similar to the modern translucent glass style associated with iOS 26.
+
+Use:
+
+- Frosted glass surfaces
+- Translucent panels
+- Background blur
+- Layered depth
+- Soft shadows
+- Subtle borders
+- Rounded corners
+- Smooth transitions
+- Floating navigation elements
+- Semi-transparent headers
+- Glass-style message composer
+- Glass-style cards and menus
+
+Keep it elegant and professional.
+
+Do not overuse blur to the point where text becomes difficult to read.
+
+Accessibility and readability must remain excellent.
+
+Use a clean neutral colour system that can later be replaced with my business branding.
+
+Support both:
+
+- Light mode
+- Dark mode
+
+The app should feel premium on iPhone while also looking polished and native on Android.
+
+Do not imitate Apple's proprietary assets or copy exact Apple screens.
+
+Create an original glass-inspired interface.
+
+## AUTHENTICATION
+
+Staff must be able to create an account using:
+
+- Email address
+- Password
+
+Create screens for:
+
+- Sign up
+- Login
+- Forgot password
+- Reset password
+
+When a new employee signs up, they must NOT immediately receive access to the messaging system.
+
+Their account status should initially be:
+
+PENDING APPROVAL
+
+Show the employee a screen such as:
+
+"Your account is awaiting approval from management. You will receive access once your account has been approved."
+
+The user should not be able to access chats or company information while their account is pending.
+
+## ADMIN APPROVAL SYSTEM
+
+Create an admin role.
+
+Admins should have an Admin area where they can see:
+
+Pending Staff
+
+For each pending account show:
+
+- Name
+- Email
+- Date registered
+- Requested role if applicable
+
+Admin actions:
+
+- Approve
+- Reject
+
+When approved, the employee becomes an active staff member and can access the app.
+
+When rejected, the account should remain blocked.
+
+Create account statuses such as:
+
+- Pending
+- Active
+- Suspended
+- Rejected
+
+Admins should also eventually be able to suspend existing employee accounts.
+
+Design this system now even though Supabase will be connected later.
+
+## MAIN APP NAVIGATION
+
+Use simple mobile navigation.
+
+Suggested bottom navigation:
+
+- Chats
+- Staff
+- Settings
+
+Announcements should NOT be a normal bottom navigation tab.
+
+Instead, announcements must always appear at the TOP of the Chats screen.
+
+## ANNOUNCEMENTS
+
+This is one of the most important features.
+
+Create a special company announcement conversation.
+
+The Announcement section must always be pinned above every normal conversation on the Chats screen.
+
+It cannot be moved below other chats.
+
+It should visually stand out without being distracting.
+
+For example:
+
+Announcement icon  
+Company Announcements  
+Latest announcement preview  
+Timestamp  
+Unread badge
+
+Admins and authorised management users can post announcements.
+
+Normal staff members can read announcements but should NOT be able to post unless specifically authorised.
+
+Announcements should support:
+
+- Text
+- Images
+- Documents
+- Links
+- Important notices
+
+Allow management to mark an announcement as:
+
+- Normal
+- Important
+- Urgent
+
+Important or urgent announcements should have a clear visual indicator.
+
+Eventually support acknowledgement such as:
+
+"Seen by 18 of 22 staff"
+
+Design the data model so this can be added later.
+
+The announcement conversation should behave similarly to a broadcast company channel rather than a normal group chat.
+
+## CHATS SCREEN
+
+Create a familiar messaging-style Chats screen.
+
+At the top:
+
+- Screen title
+- Search
+- Profile/avatar
+- New conversation button
+
+Immediately below the header:
+
+COMPANY ANNOUNCEMENTS
+
+This must remain permanently pinned.
+
+Below announcements show normal conversations ordered by most recent activity.
+
+Each conversation should display:
+
+- Profile photo or group image
+- Person/group name
+- Latest message preview
+- Latest message time
+- Unread message count
+- Sent/read indicators where relevant
+- Muted icon if muted
+- Pinned icon if manually pinned
+
+Swipe actions can eventually include:
+
+- Archive
+- Mute
+- Pin
+
+## ONE-TO-ONE MESSAGING
+
+Employees should be able to have private conversations where permitted.
+
+Create a familiar modern chat experience.
+
+Conversation header:
+
+- Back button
+- Profile photo
+- Name
+- Optional online/last active information
+- More options button
+
+Messages should display:
+
+- Incoming messages on one side
+- Current user's messages on the opposite side
+- Timestamp
+- Sending state
+- Delivered state
+- Read state
+
+Support message grouping when several messages are sent close together.
+
+Include date separators:
+
+- Today
+- Yesterday
+- Day name
+- Full date
+
+Use smooth automatic scrolling.
+
+## MESSAGE COMPOSER
+
+Create a glass-style message composer fixed to the bottom of conversations.
+
+Include:
+
+- Text input
+- Attachment button
+- Camera button
+- Send button
+
+Later support:
+
+- Photos
+- Videos
+- Documents
+- Camera
+- Photo library
+- Voice messages
+
+If voice messages are not implemented in Version 1, design the architecture so they can be added later.
+
+## WHATSAPP-LIKE FUNCTIONALITY
+
+I eventually want most of the useful messaging functionality users expect from modern apps such as WhatsApp.
+
+Plan for:
+
+- One-to-one chats
+- Group chats
+- Text messages
+- Image messages
+- Video sharing
+- Document sharing
+- Voice messages
+- Message replies
+- Forwarding
+- Message reactions
+- Delete message
+- Edit message
+- Copy message
+- Read receipts
+- Delivered receipts
+- Typing indicators
+- Online status
+- Last active
+- Search messages
+- Search conversations
+- Archived conversations
+- Pinned chats
+- Muted chats
+- Unread markers
+- Group information
+- Group admins
+- Group profile image
+- Adding/removing members
+- Mentioning users in groups
+- Links
+- Notifications
+- Notification badges
+- Deep linking from notifications
+- Profile photos
+- Block/report functionality if appropriate
+- Media/document history within a conversation
+
+Do NOT build every advanced feature immediately.
+
+Design the architecture so these features can be added progressively.
+
+## GROUP CHATS
+
+Admins and authorised staff should be able to create groups.
+
+Group creation flow:
+
+1. Select staff members
+2. Enter group name
+3. Add optional group image
+4. Create group
+
+Group information should show:
+
+- Group name
+- Group image
+- Description
+- Members
+- Administrators
+- Shared media
+- Shared documents
+
+Group administrators should eventually be able to:
+
+- Add members
+- Remove members
+- Promote admins
+- Edit group information
+
+## STAFF DIRECTORY
+
+Create a Staff tab.
+
+Display all active approved employees.
+
+Show:
+
+- Profile image
+- Full name
+- Job title
+- Department/team if available
+
+Allow search.
+
+Selecting someone should open their profile.
+
+From their profile, provide:
+
+Message
+
+Admins should have additional management controls.
+
+Pending, rejected or suspended staff must NOT appear in the normal staff directory.
+
+## PROFILE
+
+Each staff member should have a profile containing:
+
+- Profile photo
+- Full name
+- Job title
+- Email
+- Optional phone
+- Optional department/team
+- About/status
+
+Allow users to edit appropriate personal information.
+
+Admin-controlled information should not be editable by ordinary staff.
+
+## ADMIN AREA
+
+Create a secure Admin section accessible only to users with admin permissions.
+
+Include:
+
+### Pending registrations
+
+- Approve staff
+- Reject staff
+
+### Active staff
+
+- View profile
+- Suspend access
+- Reactivate staff
+- Change appropriate role/permissions
+
+### Announcements
+
+- Create announcement
+- Edit announcement
+- Delete announcement where appropriate
+- Mark important/urgent
+- View announcement readership statistics later
+
+### Groups
+
+- Create groups
+- Manage group members
+
+Do not rely only on hiding Admin buttons.
+
+When Supabase is added later, admin permissions must also be enforced at the backend/database level.
+
+## SEARCH
+
+Add global and contextual search.
+
+Chats search:
+
+- People
+- Groups
+- Conversation names
+
+Conversation search:
+
+- Search message text
+
+Staff directory search:
+
+- Name
+- Job title
+- Team
+
+## NOTIFICATIONS
+
+Design the application for Expo push notifications.
+
+Eventually support:
+
+- New private message
+- New group message
+- New announcement
+- Urgent announcement
+- Account approved
+
+Notifications should open the relevant conversation or announcement when tapped.
+
+Do not implement production push infrastructure until requested, but structure the app properly for it.
+
+## PRIVACY AND SECURITY
+
+This is a private business communication system.
+
+Security must be treated seriously.
+
+When Supabase is connected later:
+
+- Use Supabase Authentication
+- Use Row Level Security
+- Never expose service-role keys in the mobile application
+- Store sessions securely
+- Users must only access conversations they are members of
+- Staff must not be able to promote themselves
+- Staff must not be able to approve accounts
+- Pending users must not access company messages
+- Suspended users must lose access
+- Announcement posting permissions must be enforced at backend level
+- Group membership must be enforced at backend level
+
+Prepare the project architecture for these controls now.
+
+## SUPABASE LATER
+
+Do NOT require Supabase to build the first UI prototype.
+
+Use mock/local data for Version 1.
+
+However, design interfaces and data models so I can later connect Supabase for:
+
+- Authentication
+- Profiles
+- Staff approval
+- Conversations
+- Conversation members
+- Messages
+- Message receipts
+- Groups
+- Announcements
+- Attachments
+- Push notification device tokens
+
+Suggested future entities may include:
+
+profiles
+
+user_roles
+
+account_approvals
+
+conversations
+
+conversation_members
+
+messages
+
+message_receipts
+
+attachments
+
+announcements
+
+announcement_reads
+
+devices
+
+Do not create a poor schema just because these names were suggested.
+
+When we connect Supabase, recommend the cleanest relational schema.
+
+## RESPONSIVENESS
+
+The app must work properly across different:
+
+- iPhone screen sizes
+- Android phones
+- Devices with notches
+- Dynamic Island
+- Android status bars
+- Keyboard sizes
+
+Respect safe areas.
+
+The message composer must move correctly when the keyboard opens.
+
+## PERFORMANCE
+
+Messaging should feel fast.
+
+Use:
+
+- Optimistic UI for sent messages
+- Efficient scrolling
+- Virtualised message lists
+- Pagination for conversation history
+- Image caching where appropriate
+- Loading placeholders
+- Error states
+- Retry mechanisms
+
+Avoid unnecessary re-renders.
+
+## ACCESSIBILITY
+
+Include:
+
+- Appropriate contrast
+- Scalable text
+- Screen-reader labels
+- Large touch targets
+- Clear unread indicators
+- Accessible buttons
+
+Glass effects must not reduce readability.
+
+## VERSION 1
+
+Build Version 1 first.
+
+Version 1 should include:
+
+1. Splash/loading screen
+2. Sign-up
+3. Login
+4. Pending approval screen
+5. Mock admin approval
+6. Chats screen
+7. Permanently pinned Announcement section
+8. One-to-one chat UI
+9. Group chat UI
+10. Message composer
+11. Mock messages
+12. Staff directory
+13. User profiles
+14. Settings
+15. Admin section
+16. Light mode
+17. Dark mode
+18. Glass-inspired design
+19. Proper iOS/Android navigation
+
+Do NOT build the full backend yet.
+
+Do NOT attempt every advanced messaging feature during Version 1.
+
+I want to first test the complete mobile experience and design.
+
+## VERSION 2
+
+After I approve Version 1:
+
+Connect Supabase and implement:
+
+- Real authentication
+- Account approval
+- Profiles
+- Conversations
+- Messages
+- Groups
+- Realtime messaging
+- Secure permissions
+- Row Level Security
+
+## VERSION 3
+
+After Version 2 is stable:
+
+Add:
+
+- Push notifications
+- Images
+- Videos
+- Documents
+- Camera access
+- Media uploads
+- Read receipts
+- Typing indicators
+- Online presence
+- Reactions
+- Reply to message
+- Edit/delete message
+- Voice messages
+- Announcement acknowledgements
+- Deep linking
+- Search improvements
+- Archive/mute/pin
+- Offline improvements
+
+## CODE QUALITY
+
+Keep the code modular and organised.
+
+Separate:
+
+- Screens
+- Components
+- Hooks
+- Services
+- Types
+- State
+- Theme
+- Authentication
+- Messaging
+- Admin functionality
+
+Do not place the entire application into a few massive files.
+
+Use TypeScript types/interfaces consistently.
+
+Use reusable components.
+
+Keep dependencies minimal.
+
+## VERY IMPORTANT FOR REPLIT AGENT
+
+Do not make major architectural changes without explaining them first.
+
+Do not add paid third-party services without asking me.
+
+Do not add unnecessary libraries.
+
+Do not create a web version.
+
+Do not change the application into a PWA.
+
+Do not use WebView.
+
+This must remain a native React Native + Expo mobile app.
+
+Before implementing the entire Version 1, first show me:
+
+1. Proposed folder/project structure
+2. Navigation structure
+3. Main screen list
+4. Data models/interfaces
+5. Theme/design system
+6. How the iOS-style glass effect will be implemented
+7. How Supabase will later plug into the architecture
+8. Version 1 implementation plan
+
+Then proceed with Version 1 once the architecture is established.

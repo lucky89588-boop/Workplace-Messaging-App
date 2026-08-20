@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/workplace-messaging/"
+title = "Workplace Messaging"
+description = "A premium internal workplace messaging app for employees and management, with approval-gated access, chats, announcements, staff directory, profiles, settings, and admin tools."
+version = "1.0.0"
+id = "artifacts/workplace-messaging"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/workplace-messaging/" ]
+localPort = 21472
+
+[services.development]
+run = "pnpm --filter @workspace/workplace-messaging run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/workplace-messaging", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/workplace-messaging", "run", "serve" ]
+
+[services.env]
+PORT = "21472"
+BASE_PATH = "/workplace-messaging/"

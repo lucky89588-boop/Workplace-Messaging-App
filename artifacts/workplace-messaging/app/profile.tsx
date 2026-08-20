@@ -1,0 +1,17 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import React from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Avatar } from '@/components/Avatar';
+import { Glass } from '@/components/Glass';
+import { PressableScale } from '@/components/PressableScale';
+import { Screen } from '@/components/Screen';
+import { SectionLabel } from '@/components/SectionLabel';
+import { useApp } from '@/context/AppContext';
+import { useColors } from '@/hooks/useColors';
+
+export default function ProfileScreen() {
+  const colors = useColors(); const { user } = useApp();
+  return <Screen><View style={styles.top}><PressableScale onPress={() => router.back()}><Ionicons name="chevron-back" size={28} color={colors.foreground} /></PressableScale><Text style={[styles.title, { color: colors.foreground }]}>Profile</Text><PressableScale onPress={() => Alert.alert('Edit profile', 'Profile editing will be connected to Supabase in Version 2.')}><Ionicons name="create-outline" size={23} color={colors.primary} /></PressableScale></View><View style={styles.hero}><Avatar label={user.avatar} size={92} tone="navy" /><Text style={[styles.name, { color: colors.foreground }]}>{user.name}</Text><Text style={[styles.role, { color: colors.mutedForeground }]}>{user.title} · {user.department}</Text><View style={[styles.status, { backgroundColor: colors.secondary }]}><View style={[styles.dot, { backgroundColor: colors.success }]} /><Text style={[styles.statusText, { color: colors.secondaryForeground }]}>Active account</Text></View></View><SectionLabel>ABOUT</SectionLabel><Glass style={styles.card}><Text style={[styles.about, { color: colors.foreground }]}>{user.about}</Text></Glass><SectionLabel>CONTACT</SectionLabel><Glass style={styles.card}>{[['mail-outline', 'Email', user.email], ['business-outline', 'Department', user.department], ['shield-checkmark-outline', 'Access', 'Administrator']].map(([icon, label, value]) => <View style={[styles.detail, { borderBottomColor: colors.border }]} key={label}><Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={colors.primary} /><View><Text style={[styles.label, { color: colors.mutedForeground }]}>{label}</Text><Text style={[styles.value, { color: colors.foreground }]}>{value}</Text></View></View>)}</Glass></Screen>;
+}
+const styles = StyleSheet.create({ top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }, title: { fontFamily: 'Inter_700Bold', fontSize: 17 }, hero: { alignItems: 'center', marginBottom: 36 }, name: { fontFamily: 'Inter_700Bold', fontSize: 24, marginTop: 15 }, role: { fontFamily: 'Inter_400Regular', fontSize: 13, marginTop: 5 }, status: { flexDirection: 'row', alignItems: 'center', gap: 7, borderRadius: 14, paddingHorizontal: 11, paddingVertical: 7, marginTop: 14 }, dot: { width: 7, height: 7, borderRadius: 4 }, statusText: { fontFamily: 'Inter_600SemiBold', fontSize: 11 }, card: { padding: 17, marginBottom: 26, borderRadius: 20 }, about: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 22 }, detail: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 13, borderBottomWidth: 1 }, label: { fontFamily: 'Inter_500Medium', fontSize: 11, marginBottom: 3 }, value: { fontFamily: 'Inter_500Medium', fontSize: 14 } });

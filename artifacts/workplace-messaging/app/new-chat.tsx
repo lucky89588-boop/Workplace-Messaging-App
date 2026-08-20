@@ -1,0 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Avatar } from '@/components/Avatar';
+import { Glass } from '@/components/Glass';
+import { PressableScale } from '@/components/PressableScale';
+import { Screen } from '@/components/Screen';
+import { SectionLabel } from '@/components/SectionLabel';
+import { useApp } from '@/context/AppContext';
+import { useColors } from '@/hooks/useColors';
+export default function NewChatScreen() { const colors = useColors(); const { staff } = useApp(); return <Screen><View style={styles.top}><PressableScale onPress={() => router.back()}><Ionicons name="close" size={26} color={colors.foreground} /></PressableScale><Text style={[styles.title, { color: colors.foreground }]}>New conversation</Text><View style={{ width: 26 }} /></View><Text style={[styles.intro, { color: colors.mutedForeground }]}>Choose someone from the active staff directory.</Text><SectionLabel>PEOPLE</SectionLabel><Glass style={styles.panel}>{staff.filter((person) => person.id !== 'me').map((person) => <PressableScale key={person.id} onPress={() => router.push('/conversation/alex-chat')} style={[styles.person, { borderBottomColor: colors.border }]}><Avatar label={person.avatar} size={44} /><View style={styles.copy}><Text style={[styles.name, { color: colors.foreground }]}>{person.name}</Text><Text style={[styles.meta, { color: colors.mutedForeground }]}>{person.title}</Text></View><Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.primary} /></PressableScale>)}</Glass><PressableScale onPress={() => router.push('/conversation/ops')} style={[styles.groupButton, { backgroundColor: colors.secondary }]}><Ionicons name="people-outline" size={18} color={colors.primary} /><Text style={[styles.groupText, { color: colors.secondaryForeground }]}>Start a group chat</Text></PressableScale></Screen>; }
+const styles = StyleSheet.create({ top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 26 }, title: { fontFamily: 'Inter_700Bold', fontSize: 17 }, intro: { fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 21, marginBottom: 27 }, panel: { paddingHorizontal: 15, borderRadius: 20 }, person: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 13, borderBottomWidth: 1 }, copy: { flex: 1, gap: 4 }, name: { fontFamily: 'Inter_600SemiBold', fontSize: 14 }, meta: { fontFamily: 'Inter_400Regular', fontSize: 12 }, groupButton: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, minHeight: 50, borderRadius: 16, marginTop: 18 }, groupText: { fontFamily: 'Inter_600SemiBold', fontSize: 14 } });

@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Workplace Messaging",
+    "slug": "workplace-messaging",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/workplace-icon.png",
+    "scheme": "workplace-messaging",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/workplace-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {},
+    "web": {
+      "favicon": "./assets/images/workplace-icon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://replit.com/"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

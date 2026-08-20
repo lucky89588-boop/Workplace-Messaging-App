@@ -1,0 +1,1 @@
+- [Mobile-first messaging architecture](mobile-messaging-architecture.md) — Version 1 stays frontend-first with local mock data and a Supabase-ready service seam.
