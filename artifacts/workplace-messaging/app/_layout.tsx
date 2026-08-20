@@ -29,6 +29,10 @@ function RootLayoutNav() {
       <Stack.Screen name="person/[id]" />
       <Stack.Screen name="admin" />
       <Stack.Screen name="new-chat" />
+      <Stack.Screen name="emergency-contacts" />
+      <Stack.Screen name="mentions" />
+      <Stack.Screen name="policy" />
+      <Stack.Screen name="set-password" />
     </Stack>
   );
 }

@@ -3,10 +3,10 @@ import { Conversation, Message, PendingAccount, UserProfile } from '@/types/app'
 export const currentUser: UserProfile = {
   id: 'me',
   name: 'Maya Chen',
-  email: 'maya.chen@northstar.co',
-  title: 'Operations Director',
-  department: 'Operations',
-  about: 'Making work feel a little more human.',
+  email: 'maya.chen@bridgingabilities.com.au',
+  title: 'Service Delivery Manager',
+  department: 'Service Delivery',
+  about: 'Supporting clear, safe communication across our services.',
   avatar: 'MC',
   role: 'admin',
   status: 'active',
@@ -14,32 +14,32 @@ export const currentUser: UserProfile = {
 
 export const staff: UserProfile[] = [
   currentUser,
-  { id: 'alex', name: 'Alex Morgan', email: 'alex.morgan@northstar.co', title: 'Product Designer', department: 'Design', about: 'Designing calm, clear experiences.', avatar: 'AM', role: 'staff', status: 'active', lastActive: 'Online now' },
-  { id: 'riley', name: 'Riley Jones', email: 'riley.jones@northstar.co', title: 'People & Culture Lead', department: 'People', about: 'Here to help the team do their best work.', avatar: 'RJ', role: 'manager', status: 'active', lastActive: 'Active 12m ago' },
-  { id: 'sam', name: 'Sam Wilson', email: 'sam.wilson@northstar.co', title: 'Warehouse Coordinator', department: 'Operations', about: 'Coffee, logistics, and good systems.', avatar: 'SW', role: 'staff', status: 'active', lastActive: 'Active 1h ago' },
-  { id: 'jordan', name: 'Jordan Lee', email: 'jordan.lee@northstar.co', title: 'Finance Manager', department: 'Finance', about: 'Keeping the numbers moving.', avatar: 'JL', role: 'manager', status: 'active', lastActive: 'Active yesterday' },
+  { id: 'alex', name: 'Alex Morgan', email: 'alex.morgan@bridgingabilities.com.au', title: 'Support Worker', department: 'Supported Independent Living', about: 'Helping people build confident, connected lives.', avatar: 'AM', role: 'staff', status: 'active', lastActive: 'Online now' },
+  { id: 'riley', name: 'Riley Jones', email: 'riley.jones@bridgingabilities.com.au', title: 'People & Culture Lead', department: 'People & Culture', about: 'Here to help the team do their best work.', avatar: 'RJ', role: 'manager', status: 'active', lastActive: 'Active 12m ago' },
+  { id: 'sam', name: 'Sam Wilson', email: 'sam.wilson@bridgingabilities.com.au', title: 'Senior Support Worker', department: 'Supported Independent Living', about: 'Keeping each shift safe, clear, and connected.', avatar: 'SW', role: 'staff', status: 'active', lastActive: 'Active 1h ago' },
+  { id: 'jordan', name: 'Jordan Lee', email: 'jordan.lee@bridgingabilities.com.au', title: 'Operations Manager', department: 'Operations', about: 'Supporting reliable, person-centred service delivery.', avatar: 'JL', role: 'manager', status: 'active', lastActive: 'Active yesterday' },
 ];
 
 export const conversations: Conversation[] = [
-  { id: 'announcements', kind: 'announcement', name: 'Company Announcements', subtitle: 'Broadcast channel', avatar: 'AN', lastMessage: 'Q3 all-hands is next Thursday at 10am.', time: '9:42 AM', unread: 2, important: true, pinned: true },
-  { id: 'alex-chat', kind: 'direct', name: 'Alex Morgan', subtitle: 'Product Designer', avatar: 'AM', lastMessage: 'The new screens are ready for review.', time: '9:18 AM', unread: 3 },
-  { id: 'ops', kind: 'group', name: 'Operations team', subtitle: '8 members', avatar: 'OP', lastMessage: 'Sam: Delivery window moved to Friday.', time: 'Yesterday', unread: 0, members: ['me', 'sam', 'riley'] },
-  { id: 'leadership', kind: 'group', name: 'Leadership circle', subtitle: '5 members', avatar: 'LC', lastMessage: 'Riley: I have added the agenda.', time: 'Tue', unread: 0, members: ['me', 'riley', 'jordan'] },
+  { id: 'announcements', kind: 'announcement', name: 'Organisation Announcements', subtitle: 'Broadcast channel', avatar: 'AN', lastMessage: 'Staff forum is next Thursday at 10am.', time: '9:42 AM', unread: 2, important: true, pinned: true },
+  { id: 'alex-chat', kind: 'direct', name: 'Alex Morgan', subtitle: 'Support Worker', avatar: 'AM', lastMessage: 'I have finished the handover notes.', time: '9:18 AM', unread: 3 },
+  { id: 'ops', kind: 'group', name: 'Ashfield House team', subtitle: '3 members · ASH-01', avatar: 'AH', lastMessage: 'Sam: Handover notes are ready for Friday.', time: 'Yesterday', unread: 0, members: ['me', 'sam', 'riley'] },
+  { id: 'leadership', kind: 'group', name: 'Leadership team', subtitle: '3 members', avatar: 'LT', lastMessage: 'Riley: I have added the agenda.', time: 'Tue', unread: 0, members: ['me', 'riley', 'jordan'] },
 ];
 
 export const messages: Record<string, Message[]> = {
   announcements: [
-    { id: 'a1', conversationId: 'announcements', senderId: 'riley', text: 'Q3 all-hands is next Thursday at 10am. We’ll share progress, priorities, and a few team celebrations.', time: '9:42 AM' },
+    { id: 'a1', conversationId: 'announcements', senderId: 'riley', text: 'Our next staff forum is Thursday at 10am. We will share service updates, priorities, and team celebrations.', time: '9:42 AM' },
     { id: 'a2', conversationId: 'announcements', senderId: 'riley', text: 'Please add your questions to the shared agenda before Wednesday afternoon.', time: '9:44 AM' },
   ],
   'alex-chat': [
-    { id: 'm1', conversationId: 'alex-chat', senderId: 'me', text: 'How are the new onboarding screens feeling?', time: '9:08 AM', outgoing: true, status: 'read' },
-    { id: 'm2', conversationId: 'alex-chat', senderId: 'alex', text: 'Much better. I tightened the first-time flow and softened the empty states.', time: '9:12 AM' },
-    { id: 'm3', conversationId: 'alex-chat', senderId: 'alex', text: 'The new screens are ready for review.', time: '9:18 AM' },
+    { id: 'm1', conversationId: 'alex-chat', senderId: 'me', text: 'How did the afternoon shift handover go?', time: '9:08 AM', outgoing: true, status: 'read' },
+    { id: 'm2', conversationId: 'alex-chat', senderId: 'alex', text: 'Really smoothly. The notes are complete and the team is across the plan.', time: '9:12 AM' },
+    { id: 'm3', conversationId: 'alex-chat', senderId: 'alex', text: 'I have finished the handover notes.', time: '9:18 AM' },
   ],
   ops: [
-    { id: 'o1', conversationId: 'ops', senderId: 'sam', text: 'Quick update: delivery window moved to Friday.', time: 'Yesterday' },
-    { id: 'o2', conversationId: 'ops', senderId: 'me', text: 'Thanks Sam — I’ll update the supplier notes.', time: 'Yesterday', outgoing: true, status: 'delivered' },
+    { id: 'o1', conversationId: 'ops', senderId: 'sam', text: 'Quick update: handover notes are ready for Friday.', time: 'Yesterday' },
+    { id: 'o2', conversationId: 'ops', senderId: 'me', text: 'Thanks Sam — I will update the shift notes.', time: 'Yesterday', outgoing: true, status: 'delivered' },
   ],
   leadership: [
     { id: 'l1', conversationId: 'leadership', senderId: 'riley', text: 'I have added the agenda for Tuesday.', time: 'Tue' },
@@ -47,6 +47,6 @@ export const messages: Record<string, Message[]> = {
 };
 
 export const pendingAccounts: PendingAccount[] = [
-  { id: 'pending-1', name: 'Taylor Reed', email: 'taylor.reed@northstar.co', requestedRole: 'Staff member', date: '21 Aug 2026', avatar: 'TR' },
-  { id: 'pending-2', name: 'Casey Patel', email: 'casey.patel@northstar.co', requestedRole: 'Team lead', date: '20 Aug 2026', avatar: 'CP' },
+  { id: 'pending-1', name: 'Taylor Reed', email: 'taylor.reed@bridgingabilities.com.au', requestedRole: 'Support worker', date: '21 Aug 2026', avatar: 'TR' },
+  { id: 'pending-2', name: 'Casey Patel', email: 'casey.patel@bridgingabilities.com.au', requestedRole: 'Team leader', date: '20 Aug 2026', avatar: 'CP' },
 ];
