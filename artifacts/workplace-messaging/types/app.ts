@@ -23,6 +23,33 @@ export interface Message {
   time: string;
   outgoing?: boolean;
   status?: 'sent' | 'delivered' | 'read';
+  attachment?: PollAttachment | EventAttachment;
+}
+
+export interface PollOption {
+  id: string;
+  label: string;
+  votes: number;
+}
+
+export interface PollAttachment {
+  type: 'poll';
+  question: string;
+  options: PollOption[];
+  selectedOptionId?: string;
+}
+
+export type EventResponse = 'going' | 'maybe' | 'not-going';
+
+export interface EventAttachment {
+  type: 'event';
+  title: string;
+  date: string;
+  time: string;
+  location?: string;
+  details?: string;
+  responseCounts: Record<EventResponse, number>;
+  selectedResponse?: EventResponse;
 }
 
 export interface Conversation {

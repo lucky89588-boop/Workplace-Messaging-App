@@ -1,0 +1,20 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Glass } from '@/components/Glass';
+import { PressableScale } from '@/components/PressableScale';
+import { useColors } from '@/hooks/useColors';
+
+export default function PendingScreen() {
+  const colors = useColors();
+  return <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.icon, { backgroundColor: colors.secondary }]}><Ionicons name="time-outline" size={35} color={colors.primary} /></View>
+    <Text style={[styles.title, { color: colors.foreground }]}>You’re on the list.</Text>
+    <Text style={[styles.copy, { color: colors.mutedForeground }]}>Your account is awaiting approval from management. You’ll receive access once your request has been reviewed.</Text>
+    <Glass style={styles.card}><View style={[styles.dot, { backgroundColor: colors.primary }]} /><View style={styles.cardCopy}><Text style={[styles.cardTitle, { color: colors.foreground }]}>Pending approval</Text><Text style={[styles.cardText, { color: colors.mutedForeground }]}>Company messages and staff details stay locked until then.</Text></View></Glass>
+    <PressableScale onPress={() => router.replace('/')} style={[styles.back, { borderColor: colors.border }]}><Text style={[styles.backText, { color: colors.foreground }]}>Back to sign in</Text></PressableScale>
+  </View>;
+}
+
+const styles = StyleSheet.create({ root: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28 }, icon: { width: 76, height: 76, borderRadius: 26, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }, title: { fontFamily: 'Inter_500Medium', fontSize: 28, textAlign: 'center', letterSpacing: -0.8 }, copy: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 23, textAlign: 'center', marginTop: 12, maxWidth: 320 }, card: { width: '100%', borderRadius: 20, padding: 17, flexDirection: 'row', gap: 12, marginTop: 32 }, dot: { width: 10, height: 10, borderRadius: 5, marginTop: 4 }, cardCopy: { flex: 1, gap: 5 }, cardTitle: { fontFamily: 'Inter_500Medium', fontSize: 14 }, cardText: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 18 }, back: { minHeight: 48, minWidth: 160, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginTop: 18 }, backText: { fontFamily: 'Inter_500Medium', fontSize: 13 } });

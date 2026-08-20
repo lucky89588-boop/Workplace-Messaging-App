@@ -33,6 +33,8 @@ function RootLayoutNav() {
       <Stack.Screen name="mentions" />
       <Stack.Screen name="policy" />
       <Stack.Screen name="set-password" />
+      <Stack.Screen name="signup" />
+      <Stack.Screen name="pending" />
     </Stack>
   );
 }
