@@ -19,9 +19,13 @@ function NativeTabLayout() {
         <Icon sf={{ default: 'house', selected: 'house.fill' }} />
         <Label>Chats</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="staff">
+      <NativeTabs.Trigger name="announcements">
+        <Icon sf={{ default: 'megaphone', selected: 'megaphone.fill' }} />
+        <Label>Announcements</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="directory">
         <Icon sf={{ default: 'person.2', selected: 'person.2.fill' }} />
-        <Label>Staff</Label>
+        <Label>Directory</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <Icon sf={{ default: 'gearshape', selected: 'gearshape.fill' }} />
@@ -72,7 +76,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Chats',
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="house" tintColor={color} size={24} />
@@ -82,9 +86,17 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="staff"
+        name="announcements"
         options={{
-          title: 'Staff',
+          title: 'Announcements',
+          tabBarIcon: ({ color }) =>
+            isIOS ? <SymbolView name="megaphone" tintColor={color} size={24} /> : <Feather name="bell" size={22} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="directory"
+        options={{
+          title: 'Directory',
           tabBarIcon: ({ color }) =>
             isIOS ? <SymbolView name="person.2" tintColor={color} size={24} /> : <Feather name="users" size={22} color={color} />,
         }}
