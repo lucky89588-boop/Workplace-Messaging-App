@@ -35,13 +35,13 @@ Native Expo React Native workplace messaging app for private employee and manage
 
 - Version 1 started frontend-first with local mock data; the checked-in `supabase/` migration now defines the secure shared-data foundation. Supabase should replace the context's data operations rather than the screen contracts.
 - Supabase tables use a `ba_` prefix and are managed through `supabase/migrations/`, not Drizzle push. Run schema changes through the Supabase SQL Editor or a Supabase migration pipeline.
-- Account approval is represented as a first-class flow: sign-up leads to a pending screen, while admin actions operate on pending registrations.
+- Staff access is admin-provisioned only: the API server creates Supabase Auth accounts with one-time temporary passwords, and the app gates workplace access on password replacement and policy acknowledgement.
 - Announcements are a distinct conversation kind and remain pinned above normal chats.
 - Native iOS 26 tabs use NativeTabs when available, with a BlurView-backed classic tab fallback for Android and older iOS.
 
 ## Product
 
-The app includes a staff sign-in and policy flow, chats with a permanently pinned announcements channel, one-to-one and group conversation UI, a local message composer, searchable staff directory, staff profiles, settings with light/dark mode, emergency contacts, and an admin approval area.
+The app includes a Supabase-backed staff sign-in, mandatory password/policy onboarding, admin-managed Staff access, chats with a permanently pinned announcements channel, one-to-one and group conversation UI, a local message composer, searchable staff directory, staff profiles, settings with light/dark mode, and emergency contacts.
 
 ## User preferences
 
@@ -52,6 +52,7 @@ The app includes a staff sign-in and policy flow, chats with a permanently pinne
 
 - Use the managed `artifacts/workplace-messaging: expo` workflow rather than starting Expo directly in the shell.
 - If the API contract is added later, update OpenAPI and regenerate shared client types before consuming new server endpoints.
+- The API Server Supabase connection requires Admin API authority for staff provisioning; never expose that credential to the Expo app.
 
 ## Pointers
 

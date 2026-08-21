@@ -3,25 +3,25 @@ import React from 'react';
 import { Alert, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '@/components/PressableScale';
-import { useApp } from '@/context/AppContext';
+import { getErrorMessage, useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
 
 export default function WelcomeScreen() {
   const colors = useColors();
-  const { getAccountStatus } = useApp();
+  const { isLoading, signIn } = useAuth();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const signIn = () => {
-    const status = getAccountStatus(email);
-    if (status === 'pending') return router.replace('/pending');
-    if (status === 'rejected') return Alert.alert('Request not approved', 'Please contact your manager if you need help with your staff access request.');
-    if (status === 'active') return router.replace('/policy');
-    Alert.alert('Use an approved work email', 'Request staff access if you do not yet have an approved Bridging Abilities account.');
+  const handleSignIn = async () => {
+    try {
+      await signIn(email, password);
+    } catch (error) {
+      Alert.alert('Unable to sign in', getErrorMessage(error, 'Please try again.'));
+    }
   };
   return <KeyboardAvoidingView behavior="padding" style={[styles.keyboard, { backgroundColor: colors.background }]}>
     <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       <View style={styles.brand}><Image source={require('@/assets/images/company-logo.png')} style={styles.logo} accessibilityLabel="Bridging Abilities company logo" /><Text style={[styles.brandName, { color: colors.foreground }]}>Bridging Abilities Staff</Text><Text style={[styles.tagline, { color: colors.mutedForeground }]}>Private team communication</Text></View>
-      <View style={styles.bottom}><Text style={[styles.welcome, { color: colors.foreground }]}>Sign in</Text><Text style={[styles.copy, { color: colors.mutedForeground }]}>Use your work account to continue.</Text><Text style={[styles.label, { color: colors.mutedForeground }]}>WORK EMAIL</Text><TextInput value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="you@bridgingabilities.com.au" placeholderTextColor={colors.mutedForeground} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]} /><Text style={[styles.label, { color: colors.mutedForeground }]}>PASSWORD</Text><TextInput value={password} onChangeText={setPassword} secureTextEntry placeholder="Password" placeholderTextColor={colors.mutedForeground} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]} /><Text style={[styles.helper, { color: colors.mutedForeground }]}>Forgotten your password? Contact your manager to have it reset.</Text><PressableScale onPress={signIn} style={[styles.primary, { backgroundColor: colors.royalBlue }]}><Text style={styles.primaryText}>Sign in</Text><Ionicons name="arrow-forward" size={18} color="#fff" /></PressableScale><Text style={[styles.note, { color: colors.mutedForeground }]}>Access is limited to Bridging Abilities staff.</Text></View>
+      <View style={styles.bottom}><Text style={[styles.welcome, { color: colors.foreground }]}>Sign in</Text><Text style={[styles.copy, { color: colors.mutedForeground }]}>Use your work account to continue.</Text><Text style={[styles.label, { color: colors.mutedForeground }]}>WORK EMAIL</Text><TextInput value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="you@bridgingabilities.com.au" placeholderTextColor={colors.mutedForeground} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]} /><Text style={[styles.label, { color: colors.mutedForeground }]}>PASSWORD</Text><TextInput value={password} onChangeText={setPassword} secureTextEntry placeholder="Password" placeholderTextColor={colors.mutedForeground} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]} /><Text style={[styles.helper, { color: colors.mutedForeground }]}>Forgotten your password? Contact your manager to have it reset.</Text><PressableScale disabled={isLoading} onPress={handleSignIn} style={[styles.primary, { backgroundColor: colors.royalBlue, opacity: isLoading ? 0.7 : 1 }]}><Text style={styles.primaryText}>{isLoading ? 'Signing in…' : 'Sign in'}</Text><Ionicons name="arrow-forward" size={18} color="#fff" /></PressableScale><Text style={[styles.note, { color: colors.mutedForeground }]}>Access is limited to Bridging Abilities staff.</Text></View>
     </ScrollView>
   </KeyboardAvoidingView>;
 }

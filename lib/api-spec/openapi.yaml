@@ -24,7 +24,140 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/sign-in:
+    post:
+      operationId: signInStaff
+      tags: [staff-auth]
+      summary: Sign in a staff member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInRequest"
+      responses:
+        "200":
+          description: Authenticated session and onboarding state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignInResponse"
+        "401":
+          $ref: "#/components/responses/RequestError"
+  /auth/session:
+    get:
+      operationId: getStaffSession
+      tags: [staff-auth]
+      summary: Get current staff onboarding state
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Current staff state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingResponse"
+        "401":
+          $ref: "#/components/responses/RequestError"
+  /auth/password:
+    post:
+      operationId: setStaffPassword
+      tags: [staff-auth]
+      summary: Replace a temporary password
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetPasswordRequest"
+      responses:
+        "200":
+          description: Updated onboarding state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingResponse"
+        "400":
+          $ref: "#/components/responses/RequestError"
+  /auth/policy-acceptance:
+    post:
+      operationId: acceptStaffPolicy
+      tags: [staff-auth]
+      summary: Save policy acknowledgement
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Updated onboarding state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingResponse"
+        "409":
+          $ref: "#/components/responses/RequestError"
+  /staff:
+    get:
+      operationId: listStaffAccess
+      tags: [staff-access]
+      summary: List staff accounts for an administrator
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Staff accounts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffListResponse"
+    post:
+      operationId: createStaffAccess
+      tags: [staff-access]
+      summary: Create staff access and a temporary password
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStaffRequest"
+      responses:
+        "201":
+          description: New staff account and one-time temporary password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffCredentialResponse"
+  /staff/{profileId}/reset-password:
+    post:
+      operationId: resetStaffTemporaryPassword
+      tags: [staff-access]
+      summary: Replace a staff member temporary password
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: New temporary password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffCredentialResponse"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    RequestError:
+      description: Request was rejected
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RequestError"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +166,78 @@ components:
           type: string
       required:
         - status
+    RequestError:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+      required: [error]
+    StaffProfile:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string }
+        display_name: { type: string }
+        role: { type: string, enum: [staff, manager, admin] }
+        status: { type: string, enum: [pending, active, suspended, rejected] }
+        password_change_required: { type: boolean }
+        temporary_password_issued_at: { type: [string, "null"], format: date-time }
+        first_password_set_at: { type: [string, "null"], format: date-time }
+        policy_accepted_at: { type: [string, "null"], format: date-time }
+        policy_version: { type: [string, "null"] }
+      required: [id, email, display_name, role, status, password_change_required, temporary_password_issued_at, first_password_set_at, policy_accepted_at, policy_version]
+    AuthSession:
+      type: object
+      properties:
+        access_token: { type: string }
+        refresh_token: { type: string }
+        expires_in: { type: number }
+        token_type: { type: string }
+      required: [access_token, refresh_token, expires_in, token_type]
+    SignInRequest:
+      type: object
+      properties:
+        email: { type: string }
+        password: { type: string, format: password }
+      required: [email, password]
+    SignInResponse:
+      type: object
+      properties:
+        session: { $ref: "#/components/schemas/AuthSession" }
+        profile: { $ref: "#/components/schemas/StaffProfile" }
+        next: { type: string, enum: [set-password, policy, ready] }
+      required: [session, profile, next]
+    SetPasswordRequest:
+      type: object
+      properties:
+        password: { type: string, format: password, minLength: 8 }
+      required: [password]
+    OnboardingResponse:
+      type: object
+      properties:
+        profile: { $ref: "#/components/schemas/StaffProfile" }
+        next: { type: string, enum: [set-password, policy, ready] }
+      required: [profile, next]
+    CreateStaffRequest:
+      type: object
+      properties:
+        displayName: { type: string, minLength: 1, maxLength: 120 }
+        email: { type: string }
+        role: { type: string, enum: [staff, manager] }
+      required: [displayName, email, role]
+    StaffListResponse:
+      type: object
+      properties:
+        staff:
+          type: array
+          items: { $ref: "#/components/schemas/StaffProfile" }
+      required: [staff]
+    StaffCredentialResponse:
+      type: object
+      properties:
+        staff: { $ref: "#/components/schemas/StaffProfile" }
+        temporaryPassword: { type: string }
+      required: [staff, temporaryPassword]
 
