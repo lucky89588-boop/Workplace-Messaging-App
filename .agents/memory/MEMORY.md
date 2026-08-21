@@ -1,1 +1,2 @@
 - [Mobile-first messaging architecture](mobile-messaging-architecture.md) — Version 1 stays frontend-first with local mock data and a Supabase-ready service seam.
+- [Async state hydration](async-state-hydration.md) — Gate local-first UI until storage restore finishes so defaults cannot overwrite saved staff data.

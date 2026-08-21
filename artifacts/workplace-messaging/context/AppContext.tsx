@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, PropsWithChildren, useContext, useMemo, useState } from 'react';
+import React, { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { currentUser, conversations as initialConversations, messages as initialMessages, pendingAccounts, staff } from '@/data/mockData';
 import { AccountStatus, Conversation, EventResponse, Message, PendingAccount, PollOption, UserProfile } from '@/types/app';
 
@@ -11,9 +12,11 @@ interface AppContextValue {
   pending: PendingAccount[];
   isDark: boolean;
   toggleTheme: () => void;
+  resetLocalData: () => Promise<boolean>;
   sendMessage: (conversationId: string, text: string) => void;
   requestAccess: (name: string, email: string) => void;
   getAccountStatus: (email: string) => AccountStatus | undefined;
+  createGroup: (details: { name: string; houseReference: string; description: string; accent: string; members: string[] }) => string;
   createPoll: (conversationId: string, question: string, options: string[]) => void;
   createEvent: (conversationId: string, event: { title: string; date: string; time: string; location?: string; details?: string }) => void;
   votePoll: (messageId: string, optionId: string) => void;
@@ -24,17 +27,82 @@ interface AppContextValue {
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
+const STORAGE_KEY = 'workplace:app-state';
+const STORAGE_VERSION = 1;
+
+interface PersistedAppState {
+  version: number;
+  isDark: boolean;
+  conversations: Conversation[];
+  messages: Record<string, Message[]>;
+  pending: PendingAccount[];
+  accountStatuses: Record<string, AccountStatus>;
+  user: UserProfile;
+}
+
+function getInitialAccountStatuses(): Record<string, AccountStatus> {
+  return {
+    [currentUser.email.toLowerCase()]: 'active',
+    ...Object.fromEntries(pendingAccounts.map((account) => [account.email.toLowerCase(), 'pending' as AccountStatus])),
+  };
+}
+
+function createLocalId(prefix: string) {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export function AppProvider({ children }: PropsWithChildren) {
   const [isDark, setIsDark] = useState(false);
   const [conversationState, setConversationState] = useState(initialConversations);
   const [messageState, setMessageState] = useState(initialMessages);
   const [pendingState, setPendingState] = useState(pendingAccounts);
-  const [accountStatusState, setAccountStatusState] = useState<Record<string, AccountStatus>>(() => ({
-    [currentUser.email.toLowerCase()]: 'active',
-    ...Object.fromEntries(pendingAccounts.map((account) => [account.email.toLowerCase(), 'pending' as AccountStatus])),
-  }));
+  const [accountStatusState, setAccountStatusState] = useState<Record<string, AccountStatus>>(getInitialAccountStatuses);
   const [userState, setUserState] = useState(currentUser);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const restoreState = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (!stored || !mounted) return;
+        const saved = JSON.parse(stored) as Partial<PersistedAppState>;
+        if (saved.version !== STORAGE_VERSION || !saved.conversations || !saved.messages || !saved.pending || !saved.accountStatuses || !saved.user) return;
+        setIsDark(saved.isDark === true);
+        setConversationState(saved.conversations);
+        setMessageState(saved.messages);
+        setPendingState(saved.pending);
+        setAccountStatusState(saved.accountStatuses);
+        setUserState(saved.user);
+      } catch (error) {
+        console.warn('Unable to restore local workplace data.', error);
+      } finally {
+        if (mounted) setIsHydrated(true);
+      }
+    };
+
+    void restoreState();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    const snapshot: PersistedAppState = {
+      version: STORAGE_VERSION,
+      isDark,
+      conversations: conversationState,
+      messages: messageState,
+      pending: pendingState,
+      accountStatuses: accountStatusState,
+      user: userState,
+    };
+    void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot)).catch((error) => {
+      console.warn('Unable to save local workplace data.', error);
+    });
+  }, [accountStatusState, conversationState, isDark, isHydrated, messageState, pendingState, userState]);
 
   const value = useMemo<AppContextValue>(() => ({
     user: userState,
@@ -44,6 +112,21 @@ export function AppProvider({ children }: PropsWithChildren) {
     pending: pendingState,
     isDark,
     toggleTheme: () => setIsDark((value) => !value),
+    resetLocalData: async () => {
+      try {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.warn('Unable to reset local workplace data.', error);
+        return false;
+      }
+      setIsDark(false);
+      setConversationState(initialConversations);
+      setMessageState(initialMessages);
+      setPendingState(pendingAccounts);
+      setAccountStatusState(getInitialAccountStatuses());
+      setUserState(currentUser);
+      return true;
+    },
     requestAccess: (name, email) => {
       const id = `request-${Date.now()}`;
       const next: PendingAccount = {
@@ -58,15 +141,36 @@ export function AppProvider({ children }: PropsWithChildren) {
       setAccountStatusState((existing) => ({ ...existing, [email.toLowerCase()]: 'pending' }));
     },
     getAccountStatus: (email) => accountStatusState[email.trim().toLowerCase()],
+    createGroup: ({ name, houseReference, description, accent, members }) => {
+      const id = createLocalId('group');
+      const memberIds = ['me', ...members.filter((member) => member !== 'me')];
+      const nextConversation: Conversation = {
+        id,
+        kind: 'group',
+        name,
+        subtitle: `${memberIds.length} members${houseReference ? ` · ${houseReference}` : ''}`,
+        avatar: name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase(),
+        lastMessage: 'Group created. Start the conversation.',
+        time: 'Now',
+        unread: 0,
+        members: memberIds,
+        houseReference,
+        description,
+        accent,
+      };
+      setConversationState((existing) => [nextConversation, ...existing]);
+      setMessageState((existing) => ({ ...existing, [id]: [] }));
+      return id;
+    },
     sendMessage: (conversationId, text) => {
-      const next: Message = { id: `${Date.now()}`, conversationId, senderId: 'me', text, time: 'Now', outgoing: true, status: 'sent' };
+      const next: Message = { id: createLocalId('message'), conversationId, senderId: 'me', text, time: 'Now', outgoing: true, status: 'sent' };
       setMessageState((existing) => ({ ...existing, [conversationId]: [...(existing[conversationId] ?? []), next] }));
       setConversationState((existing) => existing.map((conversation) => conversation.id === conversationId ? { ...conversation, lastMessage: text, time: 'Now' } : conversation));
     },
     createPoll: (conversationId, question, options) => {
       const pollOptions: PollOption[] = options.map((label, index) => ({ id: `option-${index}-${Date.now()}`, label, votes: 0 }));
       const next: Message = {
-        id: `poll-${Date.now()}`,
+        id: createLocalId('poll'),
         conversationId,
         senderId: 'me',
         text: `Poll: ${question}`,
@@ -80,7 +184,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     },
     createEvent: (conversationId, event) => {
       const next: Message = {
-        id: `event-${Date.now()}`,
+        id: createLocalId('event'),
         conversationId,
         senderId: 'me',
         text: `Event: ${event.title}`,
@@ -144,7 +248,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     updateUser: (updates) => setUserState((existing) => ({ ...existing, ...updates })),
   }), [accountStatusState, conversationState, isDark, messageState, pendingState, userState]);
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={value}>{isHydrated ? children : <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator /></View>}</AppContext.Provider>;
 }
 
 export function useApp() {

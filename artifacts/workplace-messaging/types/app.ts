@@ -65,6 +65,9 @@ export interface Conversation {
   members?: string[];
   muted?: boolean;
   pinned?: boolean;
+  houseReference?: string;
+  description?: string;
+  accent?: string;
 }
 
 export interface PendingAccount {
