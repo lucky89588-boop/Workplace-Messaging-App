@@ -42,6 +42,8 @@ export interface StaffMessageRecord {
   metadata: Record<string, unknown>;
   created_at: string;
   edited_at: string | null;
+  client_message_id?: string | null;
+  was_created?: boolean;
 }
 
 export interface CreateStaffMessageInput {
@@ -50,6 +52,7 @@ export interface CreateStaffMessageInput {
   parentMessageId?: string;
   kind?: StaffMessageRecord["kind"];
   metadata?: Record<string, unknown>;
+  clientMessageId?: string;
 }
 
 export interface StaffDataGateway {
@@ -93,6 +96,13 @@ export function createSupabaseStaffGateway(
     async createMessage(
       input: CreateStaffMessageInput,
     ): Promise<StaffMessageRecord> {
+      if (input.clientMessageId) {
+        const existing = await transport.request<StaffMessageRecord[]>(
+          `/rest/v1/ba_messages?select=*&client_message_id=eq.${encodeURIComponent(input.clientMessageId)}&limit=1`,
+          { method: "GET", headers: jsonHeaders },
+        );
+        if (existing[0]) return { ...existing[0], was_created: false };
+      }
       const result = await transport.request<StaffMessageRecord[]>(
         "/rest/v1/ba_messages",
         {
@@ -107,6 +117,7 @@ export function createSupabaseStaffGateway(
             kind: input.kind ?? "text",
             body: input.body,
             metadata: input.metadata ?? {},
+            client_message_id: input.clientMessageId ?? null,
           },
         },
       );
@@ -114,7 +125,7 @@ export function createSupabaseStaffGateway(
       if (!result[0]) {
         throw new Error("Supabase did not return the created message.");
       }
-      return result[0];
+      return { ...result[0], was_created: true };
     },
   };
 }

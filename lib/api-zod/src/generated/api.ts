@@ -187,3 +187,59 @@ export const ResetStaffTemporaryPasswordResponse = zod.object({
 }),
   "temporaryPassword": zod.string()
 })
+
+
+/**
+ * @summary Persist an idempotent staff message
+ */
+export const CreateConversationMessageParams = zod.object({
+  "conversationId": zod.coerce.string()
+})
+
+export const createConversationMessageBodyBodyMax = 8000;
+
+export const createConversationMessageBodyClientMessageIdMin = 8;
+export const createConversationMessageBodyClientMessageIdMax = 180;
+
+export const createConversationMessageBodyAttachmentOneNameMax = 240;
+
+
+
+export const CreateConversationMessageBody = zod.object({
+  "body": zod.string().max(createConversationMessageBodyBodyMax),
+  "clientMessageId": zod.string().min(createConversationMessageBodyClientMessageIdMin).max(createConversationMessageBodyClientMessageIdMax),
+  "attachment": zod.union([zod.object({
+  "type": zod.enum(['image', 'document']),
+  "name": zod.string().max(createConversationMessageBodyAttachmentOneNameMax),
+  "mimeType": zod.string().nullish(),
+  "size": zod.number().nullish(),
+  "storagePath": zod.string().optional()
+}),zod.null()]).optional()
+})
+
+export const CreateConversationMessageResponse = zod.object({
+  "message": zod.object({
+  "id": zod.string(),
+  "conversation_id": zod.string(),
+  "sender_id": zod.string().nullable(),
+  "parent_message_id": zod.string().nullable(),
+  "kind": zod.enum(['text', 'poll', 'event', 'system']),
+  "body": zod.string(),
+  "metadata": zod.record(zod.string(), zod.unknown()),
+  "client_message_id": zod.string().nullable(),
+  "created_at": zod.coerce.date(),
+  "edited_at": zod.coerce.date().nullable()
+})
+})
+
+
+/**
+ * @summary Register this staff device for privacy-safe message notifications
+ */
+export const RegisterDevicePushTokenBody = zod.object({
+  "expoPushToken": zod.string().optional(),
+  "platform": zod.enum(['ios', 'android']).optional(),
+  "enabled": zod.boolean()
+})
+
+export const RegisterDevicePushTokenResponse = zod.void()

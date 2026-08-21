@@ -7,11 +7,20 @@
  */
 
 export * from './authSession';
+export * from './createConversationMessageRequest';
 export * from './createStaffRequest';
 export * from './createStaffRequestRole';
 export * from './healthStatus';
+export * from './messageAttachment';
+export * from './messageAttachmentType';
+export * from './messageDeliveryResponse';
 export * from './onboardingResponse';
 export * from './onboardingResponseNext';
+export * from './persistedStaffMessage';
+export * from './persistedStaffMessageKind';
+export * from './persistedStaffMessageMetadata';
+export * from './registerDevicePushTokenRequest';
+export * from './registerDevicePushTokenRequestPlatform';
 export * from './requestError';
 export * from './requestErrorResponse';
 export * from './setPasswordRequest';

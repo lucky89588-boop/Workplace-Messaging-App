@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { processPendingNotificationJobs } from "./services/pushNotifications";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +23,8 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  void processPendingNotificationJobs().catch((err) => logger.warn({ err }, "Initial notification delivery sweep failed"));
+  setInterval(() => {
+    void processPendingNotificationJobs().catch((err) => logger.warn({ err }, "Notification delivery sweep failed"));
+  }, 30_000).unref();
 });

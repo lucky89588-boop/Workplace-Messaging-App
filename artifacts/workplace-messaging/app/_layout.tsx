@@ -13,9 +13,13 @@ import {
 } from '@expo-google-fonts/inter';
 import { router, Stack, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { AppProvider } from '@/context/AppContext';
+import { AppProvider, useApp } from '@/context/AppContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { setBaseUrl } from '@workspace/api-client-react';
+import { registerDevicePushToken, setBaseUrl } from '@workspace/api-client-react';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 setBaseUrl(
   process.env.EXPO_PUBLIC_DOMAIN
@@ -25,6 +29,15 @@ setBaseUrl(
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const queryClient = new QueryClient();
 
@@ -77,6 +90,58 @@ function AuthNavigationGuard() {
   return <RootLayoutNav />;
 }
 
+function DeviceNotificationRegistration() {
+  const { phase } = useAuth();
+  const { notificationsEnabled } = useApp();
+
+  useEffect(() => {
+    if (phase !== 'ready' || Platform.OS === 'web') return;
+    let active = true;
+
+    const registerDevice = async () => {
+      try {
+        if (!notificationsEnabled) {
+          const savedToken = await AsyncStorage.getItem('workplace:push-token');
+          if (savedToken) await registerDevicePushToken({ expoPushToken: savedToken, enabled: false });
+          return;
+        }
+        const permission = await Notifications.getPermissionsAsync();
+        if (permission.status !== 'granted') return;
+        const projectId = Constants.easConfig?.projectId
+          ?? Constants.expoConfig?.extra?.eas?.projectId;
+        const token = await Notifications.getExpoPushTokenAsync(
+          projectId ? { projectId } : undefined,
+        );
+        if (!active) return;
+        await registerDevicePushToken({
+          expoPushToken: token.data,
+          platform: Platform.OS === 'ios' ? 'ios' : 'android',
+          enabled: true,
+        });
+        await AsyncStorage.setItem('workplace:push-token', token.data);
+      } catch (error) {
+        // Keep the preference intact: an unavailable network or simulator should
+        // retry registration when the app next becomes active.
+        console.warn('Unable to register this device for workplace notifications.', error);
+      }
+    };
+
+    void registerDevice();
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const conversationId = response.notification.request.content.data?.conversationId;
+      if (typeof conversationId === 'string') {
+        router.push(`/conversation/${conversationId}`);
+      }
+    });
+    return () => {
+      active = false;
+      responseSubscription.remove();
+    };
+  }, [notificationsEnabled, phase]);
+
+  return null;
+}
+
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -99,6 +164,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <AppProvider>
+              <DeviceNotificationRegistration />
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <KeyboardProvider>
                   <AuthNavigationGuard />

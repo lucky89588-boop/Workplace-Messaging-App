@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Modal, StyleSheet, Switch, Text, View } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import React, { useEffect, useState } from 'react';
+import { Alert, Linking, Modal, Platform, StyleSheet, Switch, Text, View } from 'react-native';
 import { Glass } from '@/components/Glass';
 import { PressableScale } from '@/components/PressableScale';
 import { Screen } from '@/components/Screen';
@@ -13,10 +14,11 @@ import { useColors } from '@/hooks/useColors';
 
 export default function SettingsScreen() {
   const colors = useColors();
-  const { isDark, resetLocalData, toggleTheme } = useApp();
+  const { isDark, notificationsEnabled, resetLocalData, setNotificationsEnabled, toggleTheme } = useApp();
   const { profile, signOut } = useAuth();
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
+  const [updatingNotifications, setUpdatingNotifications] = useState(false);
   const initials = profile?.display_name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase() ?? 'BA';
 
   const resetData = async () => {
@@ -27,6 +29,62 @@ export default function SettingsScreen() {
     }
     setResetError(null);
     setShowResetConfirmation(false);
+  };
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    let mounted = true;
+    void Notifications.getPermissionsAsync()
+      .then((permission) => {
+        if (mounted && !permission.granted && notificationsEnabled) setNotificationsEnabled(false);
+      })
+      .catch((error) => console.warn('Unable to read notification permission.', error));
+    return () => {
+      mounted = false;
+    };
+  }, [notificationsEnabled, setNotificationsEnabled]);
+
+  const updateNotifications = async (enabled: boolean) => {
+    if (!enabled) {
+      setNotificationsEnabled(false);
+      return;
+    }
+    if (Platform.OS === 'web') {
+      Alert.alert('Use the mobile app', 'Device notifications are available in the Workplace Messaging mobile app.');
+      return;
+    }
+    setUpdatingNotifications(true);
+    try {
+      let permission = await Notifications.getPermissionsAsync();
+      if (!permission.granted && permission.canAskAgain) permission = await Notifications.requestPermissionsAsync();
+      if (!permission.granted) {
+        const actions = !permission.canAskAgain
+          ? [{ text: 'Cancel', style: 'cancel' as const }, { text: 'Open settings', onPress: () => { void Linking.openSettings().catch(() => Alert.alert('Unable to open settings', 'Please enable notifications in your device settings.')); } }]
+          : [{ text: 'OK' }];
+        Alert.alert('Notifications are off', 'Allow notifications to receive workplace messages, mentions, and announcements.', actions);
+        return;
+      }
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('workplace-messages', {
+          name: 'Workplace messages',
+          importance: Notifications.AndroidImportance.DEFAULT,
+        });
+      }
+      setNotificationsEnabled(true);
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Notifications are on',
+          body: 'Workplace messages and announcements can now reach this device.',
+          sound: false,
+        },
+        trigger: null,
+      });
+    } catch (error) {
+      console.warn('Unable to enable notifications.', error);
+      Alert.alert('Notifications unavailable', 'We could not enable device notifications. Please try again.');
+    } finally {
+      setUpdatingNotifications(false);
+    }
   };
 
   const row = (
@@ -76,7 +134,19 @@ export default function SettingsScreen() {
 
       <SectionLabel>YOUR APP</SectionLabel>
       <Glass style={styles.panel}>
-        {row('notifications-outline', 'Notifications', 'Messages, announcements and mentions', () => Alert.alert('Notifications', 'Push notification preferences will be available when device notifications are enabled.'))}
+        {row(
+          'notifications-outline',
+          'Notifications',
+          notificationsEnabled ? 'On for messages, announcements and mentions' : 'Off — tap to allow device notifications',
+          () => { void updateNotifications(!notificationsEnabled); },
+          <Switch
+            value={notificationsEnabled}
+            disabled={updatingNotifications}
+            onValueChange={(value) => { void updateNotifications(value); }}
+            trackColor={{ false: colors.input, true: colors.primary }}
+            thumbColor={colors.glassStrong}
+          />,
+        )}
         {row('at-outline', 'Mentions & starred', 'Messages saved for you', () => router.push('/mentions'))}
         {row('call-outline', 'Emergency contacts', 'On-call and workplace support', () => router.push('/emergency-contacts'))}
         {row(

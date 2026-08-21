@@ -20,9 +20,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CreateConversationMessageRequest,
   CreateStaffRequest,
   HealthStatus,
+  MessageDeliveryResponse,
   OnboardingResponse,
+  RegisterDevicePushTokenRequest,
   RequestErrorResponse,
   SetPasswordRequest,
   SignInRequest,
@@ -643,4 +646,147 @@ export const useResetStaffTemporaryPassword = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getResetStaffTemporaryPasswordMutationOptions(options));
+    }
+
+export const getCreateConversationMessageUrl = (conversationId: string,) => {
+
+
+
+
+  return `/api/conversations/${conversationId}/messages`
+}
+
+/**
+ * @summary Persist an idempotent staff message
+ */
+export const createConversationMessage = async (conversationId: string,
+    createConversationMessageRequest: CreateConversationMessageRequest, options?: Parameters<typeof customFetch>[1]): Promise<MessageDeliveryResponse> => {
+
+  return customFetch<MessageDeliveryResponse>(getCreateConversationMessageUrl(conversationId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createConversationMessageRequest)
+  }
+);}
+
+
+
+
+
+export const getCreateConversationMessageMutationOptions = <TError = ErrorType<RequestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConversationMessage>>, TError,{conversationId: string;data: BodyType<CreateConversationMessageRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createConversationMessage>>, TError,{conversationId: string;data: BodyType<CreateConversationMessageRequest>}, TContext> => {
+
+const mutationKey = ['createConversationMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createConversationMessage>>, {conversationId: string;data: BodyType<CreateConversationMessageRequest>}> = (props) => {
+          const {conversationId,data} = props ?? {};
+
+          return  createConversationMessage(conversationId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateConversationMessageMutationResult = NonNullable<Awaited<ReturnType<typeof createConversationMessage>>>
+    export type CreateConversationMessageMutationBody = BodyType<CreateConversationMessageRequest>
+    export type CreateConversationMessageMutationError = ErrorType<RequestErrorResponse>
+
+    /**
+ * @summary Persist an idempotent staff message
+ */
+export const useCreateConversationMessage = <TError = ErrorType<RequestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConversationMessage>>, TError,{conversationId: string;data: BodyType<CreateConversationMessageRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createConversationMessage>>,
+        TError,
+        {conversationId: string;data: BodyType<CreateConversationMessageRequest>},
+        TContext
+      > => {
+      return useMutation(getCreateConversationMessageMutationOptions(options));
+    }
+
+export const getRegisterDevicePushTokenUrl = () => {
+
+
+
+
+  return `/api/devices/push-token`
+}
+
+/**
+ * @summary Register this staff device for privacy-safe message notifications
+ */
+export const registerDevicePushToken = async (registerDevicePushTokenRequest: RegisterDevicePushTokenRequest, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRegisterDevicePushTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(registerDevicePushTokenRequest)
+  }
+);}
+
+
+
+
+
+export const getRegisterDevicePushTokenMutationOptions = <TError = ErrorType<RequestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerDevicePushToken>>, TError,{data: BodyType<RegisterDevicePushTokenRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerDevicePushToken>>, TError,{data: BodyType<RegisterDevicePushTokenRequest>}, TContext> => {
+
+const mutationKey = ['registerDevicePushToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerDevicePushToken>>, {data: BodyType<RegisterDevicePushTokenRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerDevicePushToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterDevicePushTokenMutationResult = NonNullable<Awaited<ReturnType<typeof registerDevicePushToken>>>
+    export type RegisterDevicePushTokenMutationBody = BodyType<RegisterDevicePushTokenRequest>
+    export type RegisterDevicePushTokenMutationError = ErrorType<RequestErrorResponse>
+
+    /**
+ * @summary Register this staff device for privacy-safe message notifications
+ */
+export const useRegisterDevicePushToken = <TError = ErrorType<RequestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerDevicePushToken>>, TError,{data: BodyType<RegisterDevicePushTokenRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof registerDevicePushToken>>,
+        TError,
+        {data: BodyType<RegisterDevicePushTokenRequest>},
+        TContext
+      > => {
+      return useMutation(getRegisterDevicePushTokenMutationOptions(options));
     }

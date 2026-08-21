@@ -123,6 +123,83 @@ export interface StaffCredentialResponse {
   temporaryPassword: string;
 }
 
+export type MessageAttachmentType = typeof MessageAttachmentType[keyof typeof MessageAttachmentType];
+
+
+export const MessageAttachmentType = {
+  image: 'image',
+  document: 'document',
+} as const;
+
+export interface MessageAttachment {
+  type: MessageAttachmentType;
+  /** @maxLength 240 */
+  name: string;
+  /** @nullable */
+  mimeType?: string | null;
+  /** @nullable */
+  size?: number | null;
+  storagePath?: string;
+}
+
+export interface CreateConversationMessageRequest {
+  /** @maxLength 8000 */
+  body: string;
+  /**
+     * @minLength 8
+     * @maxLength 180
+     */
+  clientMessageId: string;
+  attachment?: MessageAttachment | null;
+}
+
+export type PersistedStaffMessageKind = typeof PersistedStaffMessageKind[keyof typeof PersistedStaffMessageKind];
+
+
+export const PersistedStaffMessageKind = {
+  text: 'text',
+  poll: 'poll',
+  event: 'event',
+  system: 'system',
+} as const;
+
+export type PersistedStaffMessageMetadata = { [key: string]: unknown };
+
+export interface PersistedStaffMessage {
+  id: string;
+  conversation_id: string;
+  /** @nullable */
+  sender_id: string | null;
+  /** @nullable */
+  parent_message_id: string | null;
+  kind: PersistedStaffMessageKind;
+  body: string;
+  metadata: PersistedStaffMessageMetadata;
+  /** @nullable */
+  client_message_id: string | null;
+  created_at: string;
+  /** @nullable */
+  edited_at: string | null;
+}
+
+export interface MessageDeliveryResponse {
+  message: PersistedStaffMessage;
+}
+
+export type RegisterDevicePushTokenRequestPlatform = typeof RegisterDevicePushTokenRequestPlatform[keyof typeof RegisterDevicePushTokenRequestPlatform];
+
+
+export const RegisterDevicePushTokenRequestPlatform = {
+  ios: 'ios',
+  android: 'android',
+} as const;
+
+export interface RegisterDevicePushTokenRequest {
+  expoPushToken?: string;
+  platform?: RegisterDevicePushTokenRequestPlatform;
+  enabled: boolean;
+}
+
 /**
  * Request was rejected
  */

@@ -22,8 +22,10 @@ export interface Message {
   text: string;
   time: string;
   outgoing?: boolean;
-  status?: 'sent' | 'delivered' | 'read';
-  attachment?: PollAttachment | EventAttachment;
+  status?: 'queued' | 'failed' | 'sent' | 'delivered' | 'read';
+  serverMessageId?: string;
+  deliveryError?: string;
+  attachment?: PollAttachment | EventAttachment | FileAttachment;
 }
 
 export interface PollOption {
@@ -50,6 +52,15 @@ export interface EventAttachment {
   details?: string;
   responseCounts: Record<EventResponse, number>;
   selectedResponse?: EventResponse;
+}
+
+export interface FileAttachment {
+  type: 'image' | 'document';
+  uri?: string;
+  name: string;
+  mimeType?: string | null;
+  size?: number | null;
+  storagePath?: string;
 }
 
 export interface Conversation {

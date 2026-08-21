@@ -145,6 +145,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StaffCredentialResponse"
+  /conversations/{conversationId}/messages:
+    post:
+      operationId: createConversationMessage
+      tags: [messaging]
+      summary: Persist an idempotent staff message
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: conversationId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationMessageRequest"
+      responses:
+        "201":
+          description: Message was persisted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageDeliveryResponse"
+        "400":
+          $ref: "#/components/responses/RequestError"
+        "403":
+          $ref: "#/components/responses/RequestError"
+  /devices/push-token:
+    post:
+      operationId: registerDevicePushToken
+      tags: [notifications]
+      summary: Register this staff device for privacy-safe message notifications
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDevicePushTokenRequest"
+      responses:
+        "204":
+          description: Device token was registered
+        "400":
+          $ref: "#/components/responses/RequestError"
 components:
   securitySchemes:
     bearerAuth:
@@ -240,4 +285,49 @@ components:
         staff: { $ref: "#/components/schemas/StaffProfile" }
         temporaryPassword: { type: string }
       required: [staff, temporaryPassword]
+    MessageAttachment:
+      type: object
+      properties:
+        type: { type: string, enum: [image, document] }
+        name: { type: string, maxLength: 240 }
+        mimeType: { type: [string, "null"] }
+        size: { type: [number, "null"] }
+        storagePath: { type: string }
+      required: [type, name]
+    CreateConversationMessageRequest:
+      type: object
+      properties:
+        body: { type: string, maxLength: 8000 }
+        clientMessageId: { type: string, minLength: 8, maxLength: 180 }
+        attachment:
+          oneOf:
+            - $ref: "#/components/schemas/MessageAttachment"
+            - type: "null"
+      required: [body, clientMessageId]
+    PersistedStaffMessage:
+      type: object
+      properties:
+        id: { type: string }
+        conversation_id: { type: string }
+        sender_id: { type: [string, "null"] }
+        parent_message_id: { type: [string, "null"] }
+        kind: { type: string, enum: [text, poll, event, system] }
+        body: { type: string }
+        metadata: { type: object, additionalProperties: true }
+        client_message_id: { type: [string, "null"] }
+        created_at: { type: string, format: date-time }
+        edited_at: { type: [string, "null"], format: date-time }
+      required: [id, conversation_id, sender_id, parent_message_id, kind, body, metadata, client_message_id, created_at, edited_at]
+    MessageDeliveryResponse:
+      type: object
+      properties:
+        message: { $ref: "#/components/schemas/PersistedStaffMessage" }
+      required: [message]
+    RegisterDevicePushTokenRequest:
+      type: object
+      properties:
+        expoPushToken: { type: string }
+        platform: { type: string, enum: [ios, android] }
+        enabled: { type: boolean }
+      required: [enabled]
 

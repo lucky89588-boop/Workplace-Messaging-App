@@ -39,6 +39,10 @@ interface AuthContextValue {
 let currentAccessToken: string | null = null;
 setAuthTokenGetter(() => currentAccessToken);
 
+export function getCurrentAccessToken(): string | null {
+  return currentAccessToken;
+}
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 function phaseFrom(profile: AuthProfile): AuthPhase {

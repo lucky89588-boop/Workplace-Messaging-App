@@ -14,7 +14,12 @@
       "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
     },
     "android": {},
     "web": {
@@ -27,6 +32,20 @@
           "origin": "https://replit.com/"
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "color": "#095CF2"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow Workplace Messaging to use your camera for message attachments.",
+          "photosPermission": "Allow Workplace Messaging to access photos for message attachments."
+        }
+      ],
+      "expo-document-picker",
       "expo-font",
       "expo-web-browser"
     ],

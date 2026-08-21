@@ -31,7 +31,7 @@ function normalizeEmail(value: unknown): string | null {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
 }
 
-function text(value: unknown, maxLength: number): string | null {
+export function text(value: unknown, maxLength: number): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length > 0 && trimmed.length <= maxLength ? trimmed : null;
@@ -61,7 +61,7 @@ function isGatewayError(error: unknown): error is SupabaseGatewayError {
   return error instanceof SupabaseGatewayError;
 }
 
-function sendError(response: Response, error: unknown, fallback: string): void {
+export function sendError(response: Response, error: unknown, fallback: string): void {
   if (isGatewayError(error)) {
     response.status(error.status).json({
       error:
@@ -75,7 +75,7 @@ function sendError(response: Response, error: unknown, fallback: string): void {
   response.status(500).json({ error: fallback });
 }
 
-async function requireSessionProfile(
+export async function requireSessionProfile(
   request: Request,
   response: Response,
 ): Promise<{ token: string; profile: StaffProfile } | null> {
